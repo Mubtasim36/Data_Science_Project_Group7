@@ -1,19 +1,19 @@
 #Data Understanding
 
-#reading the dataset
+#1. reading the dataset
 url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/employee_performance.csv"
 employee <- read.csv(url)
 
 
-#displaying few rows:
+#2. displaying few rows:
 head(employee)
 
 
-#shape of the data set 
+#3.shape of the data set 
 print(paste("The shape of the dataset is: ",nrow(employee),"x",ncol(employee)))
 
 
-#show data type
+#4.show data type
 cat(
   "Data Type of Employee_ID column:", class(employee$Employee_ID), "\n",
   "Data Type of Age column:", class(employee$Age), "\n",
@@ -25,15 +25,49 @@ cat(
 )
 
 
-#Generate basic descriptive statistics
+#5.Generate basic descriptive statistics 1
 
-stats <-function(employee){
-  num_col<-employee[,sapply(employee,is.numeric)]
-    statistics<-data.frame(
-      Mean=mean(num_col)
-    )
-    
+stats <- function(employee) {
+  
+  num_col <- employee[, sapply(employee, is.numeric)]
+  
+  get_mode <- function(x) {
+    freq_table <- table(x)
+    names(freq_table)[which.max(freq_table)]
   }
+  
+  statistics <- data.frame(  #using na.rm to remove NA from calculations
+    Mean = sapply(num_col, mean, na.rm = TRUE),                  #sapply(matrix or dataframe,function to apply)
+    Median = sapply(num_col, median, na.rm = TRUE),
+    Mode = sapply(num_col, get_mode),
+    Std_Deviation = sapply(num_col, sd, na.rm = TRUE),
+    Minimum = sapply(num_col, min, na.rm = TRUE),
+    Maximum = sapply(num_col, max, na.rm = TRUE),
+    Count = sapply(num_col, length)
+  )  
+  
+  return(statistics)
+}
 
 stats(employee)
+
+
+
+#5.descriptive stat using summary()
+summary(employee)
+
+
+
+#6.Identify categorical and numerical features
+sapply(employee, function(col) {
+  if (is.numeric(col)) {
+    return("Numerical Feature")
+  } else if (is.character(col)) {
+    return("Categorical Feature")
+  }
+})
+
+
+#B. Data Exploration & Visualization
+
 
