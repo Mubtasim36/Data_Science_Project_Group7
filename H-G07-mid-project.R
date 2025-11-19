@@ -144,3 +144,45 @@ ggplot(employee, aes(x = Salary, y = Performance_Score )) +
   geom_point() +     #Adds scatter plot points (one point for each employee).
   geom_smooth(method = "lm", se = FALSE, color = "blue") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
   labs(title = "Salary vs PS", x = "Salary", y = "Performance_Score ")
+
+
+#BoxPlot
+colnames(employee)
+
+#1
+ggplot(employee, aes(x=Gender,y = Age)) +
+  geom_boxplot(fill = "tomato") +
+  labs(title = "Boxplot of Gender and Age", x="Gender", y = "Age")
+
+#2
+ggplot(employee, aes(x=Department,y = Age)) +
+  geom_boxplot(fill = "tomato") +
+  labs(title = "Boxplot of Dept and Age", x="Department", y = "Age")
+
+#3
+ggplot(employee, aes(x=Gender,y = Performance_Score)) +
+  geom_boxplot(fill = "tomato") +
+  labs(title = "Boxplot of Gender & Score", x="Gender", y = "Performance_Score")
+
+#4
+ggplot(employee, aes(x=Department,y = Salary)) +
+  geom_boxplot(fill = "tomato") +
+  labs(title = "Boxplot of Department & Salary", x="Department", y = "Salary")
+
+
+#B.3
+#Identify patterns, skewness, and possible outliers
+
+
+#C.1
+#Handling Missing Values
+#Detect missing values
+colSums(is.na(employee))    #Columnwise no. of NA values
+cat("Total NA values:", sum(is.na(employee)), "\n")    #Sum of number of NA values
+
+Clean_employee <- na.omit(employee)   #Dataframe of the dataset with 0 NA values
+
+cat("Total NA values after cleaning:", sum(is.na(employee)), "\n") #Sum of number of NA values in  new Dataframe
+
+
+
