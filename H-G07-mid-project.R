@@ -1,6 +1,19 @@
 #Data Understanding
+#Packages:
 
-#1. reading the dataset
+#List of required packages
+packages <- c("ggplot2", "dplyr","reshape2","outliers")
+
+# Install any packages that are not already installed
+installed_packages <- rownames(installed.packages())
+for (pkg in packages) {
+  if (!(pkg %in% installed_packages)) {
+    install.packages(pkg)
+  }
+}
+
+
+#1. reading the Dataset
 url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/employee_performance.csv"
 employee <- read.csv(url)
 
@@ -146,9 +159,10 @@ ggplot(employee, aes(x = Salary, y = Performance_Score )) +
   labs(title = "Salary vs PS", x = "Salary", y = "Performance_Score ")
 
 
-#BoxPlot
+#Column Names
 colnames(employee)
 
+#BoxPlot
 #1
 ggplot(employee, aes(x=Gender,y = Age)) +
   geom_boxplot(fill = "tomato") +
@@ -172,17 +186,176 @@ ggplot(employee, aes(x=Department,y = Salary)) +
 
 #B.3
 #Identify patterns, skewness, and possible outliers
+#Scatter Plot for showing Patterns
+
+library(ggplot2)
+ggplot(employee, aes(x = Performance_Score, y = Experience_Years )) +
+  geom_point() +     #Adds scatter plot points (one point for each employee).
+  geom_smooth(method = "lm", se = FALSE, color = "yellow") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
+  labs(title = "P_Score vs E_Year", x = "P_Score", y = "E_Year ")
+
+#Skewness based on Mean vs Median
+
+#For Salary
+sal_mean <- mean(employee$Salary)
+sal_median <- median(employee$Salary)
+if(sal_mean>sal_median){
+  print("Salary is Positively Skewed")
+} else if(sal_mean < sal_median){
+  print("Salary is Negatively Skewed")
+}  else {
+  print("Salary is Symmetric")
+}
+
+#For Experience_Years
+Year_mean <- mean(employee$Experience_Years, na.rm = TRUE)     #Ignoring NA values
+Year_median <- median(employee$Experience_Years,na.rm = TRUE)
+
+if(Year_mean > Year_median){
+  print("Experience_Years is Positively Skewed")
+} else if(Year_mean < Year_median){
+  print("Experience_Years is Negatively Skewed")
+} else{
+  print("Experience_Years is Symmetric")
+}
+
+#For Performance_Score
+Score_mean <- mean(employee$Performance_Score, na.rm = TRUE)     #Ignoring NA values
+Score_median <- median(employee$Performance_Score,na.rm = TRUE)
+
+if(Score_mean > Score_median){
+  print("Performance_Score is Positively Skewed")
+} else if(Score_mean < Score_median){
+  print("Performance_Score is Negatively Skewed")
+} else{
+  print("Performance_Score is Symmetric")
+}
+
+
+#Possible Outliers for AGE
+
+# Computing IQR 
+Q1 <- quantile(employee$Age, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(employee$Age, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+IQR_value <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+# Identify outliers 
+outliers <- employee$Age[!is.na(employee$Age) &  #!is.na to find outliers excluding NA values
+                           (employee$Age < lower_bound | employee$Age > upper_bound)]
+
+#Print using if-else
+if(length(outliers) > 0){
+  for(val in outliers){
+    print(paste(val, "is an outlier"))  #Loop to check for multiple outliers
+  }
+} else {
+  print("There are no outliers in Age")
+}
+
+
+
+#Possible Outliers for Salary
+
+# Computing IQR 
+Q1 <- quantile(employee$Salary, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(employee$Salary, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+IQR_value <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+# Identify outliers 
+outliers <- employee$Salary[!is.na(employee$Salary) &  #!is.na to find outliers excluding NA values
+                           (employee$Salary < lower_bound | employee$Salary > upper_bound)]
+
+#Print using if-else
+if(length(outliers) > 0){
+  for(val in outliers){
+    print(paste(format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+  }
+} else {
+  print("There are no outliers in Salary")
+}
+
+
+
 
 
 #C.1
 #Handling Missing Values
 #Detect missing values
-colSums(is.na(employee))    #Columnwise no. of NA values
-cat("Total NA values:", sum(is.na(employee)), "\n")    #Sum of number of NA values
+colSums(is.na(employee))    #Column wise no. of NA values
+cat("Total NA values:", sum(is.na(employee$Experience_Years)), "\n")    #Sum of number of NA values
 
-Clean_employee <- na.omit(employee)   #Dataframe of the dataset with 0 NA values
+#Removing NA Values in Experience_Years column
+employee <- employee[!is.na(employee$Experience_Years), ]
 
-cat("Total NA values after cleaning:", sum(is.na(employee)), "\n") #Sum of number of NA values in  new Dataframe
+#Checking NA values after removing missing values
+cat("Total NA values in Experience_Years after cleaning:", sum(is.na(employee$Experience_Years)), "\n")
+
+
+#Replacing NA values of Performance_Score with the Mean of Performance_Score
+employee$Performance_Score[is.na(employee$Performance_Score)] <- mean(employee$Performance_Score, na.rm = TRUE)
+cat("Total NA values after replacing:", sum(is.na(Clean_employee)), "\n") #Sum of number of NA values in  new Dataframe
 
 
 
+
+#C2
+
+#Possible Outliers for Performance_Score
+
+# Computing IQR 
+Q1 <- quantile(employee$Performance_Score, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(employee$Performance_Score, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+IQR_value <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+# Identify Outliers 
+outliers <- employee$Performance_Score[!is.na(employee$Performance_Score) &  #!is.na to find outliers excluding NA values
+                                         (employee$Performance_Score < lower_bound | employee$Performance_Score > upper_bound)]
+
+#Print using if-else
+if(length(outliers) > 0){
+  for(val in outliers){
+    print(paste(format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+  }
+} else {
+  print("There are no outliers in Performance_Score")
+}
+
+
+#Capping Performance_score; As there may be real performers among the Outliers, so taking an appropriate low and a high value to cap the scores
+lower_limit <- 50   #As most low values are close to 50
+upper_limit <- 95    #As most high values are close to 95
+# Cap the outliers
+employee$Performance_Score <- pmin(pmax(employee$Performance_Score, lower_limit), upper_limit)
+
+
+
+#Checking for Outliers after Capping
+# Computing IQR 
+Q1 <- quantile(employee$Performance_Score, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(employee$Performance_Score, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+IQR_value <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * IQR_value
+upper_bound <- Q3 + 1.5 * IQR_value
+
+# Identify Outliers 
+outliers <- employee$Performance_Score[!is.na(employee$Performance_Score) &  #!is.na to find outliers excluding NA values
+                                         (employee$Performance_Score < lower_bound | employee$Performance_Score > upper_bound)]
+
+#Print using if-else
+if(length(outliers) > 0){
+  for(val in outliers){
+    print(paste(format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+  }
+} else {
+  print("There are no outliers in Performance_Score")
+}
