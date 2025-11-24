@@ -27,7 +27,7 @@ print(paste("The shape of the dataset is: ",nrow(employee),"x",ncol(employee)))
 
 
 #4.show data type
-cat(
+cat(                         #Cat is used to print multi line 
   "Data Type of Employee_ID column:", class(employee$Employee_ID), "\n",
   "Data Type of Age column:", class(employee$Age), "\n",
   "Data Type of Gender column:", class(employee$Gender), "\n",
@@ -40,19 +40,24 @@ cat(
 
 #5.Generate basic descriptive statistics
 
-summary(employee)
-library(dplyr)
+summary(employee)   #For min-max,Mean,Count
 
-#Generate basic descriptive statistics for Age (by using this method) 
-employee %>%
-  
-  summarise(
-    count = n(),
-    mean_Age = mean(employee$Age),
-    sd_Age = sd(employee$Age),
-    mean_Age = mean(employee$Age),
-    sd_Age = sd(employee$Age)
-  )
+# Mode
+mode_age <- as.numeric(names(which.max(table(employee$Age))))      #Table() function is to show frequency of each/mentioned columns
+print(paste("Mode:", mode_age))
+mode_salary <- as.numeric(names(which.max(table(employee$Salary))))
+print(paste("Mode:", mode_salary))
+mode_years <- as.numeric(names(which.max(table(employee$Experience_Years))))
+print(paste("Mode:", mode_years))
+
+
+# Standard deviation
+sd_age <- sd(employee$Age, na.rm = TRUE)
+print(paste("Standard Deviation of Age:", sd_age))
+sd_salary <- sd(employee$Salary, na.rm = TRUE)
+print(paste("Standard Deviation of Salary:", sd_salary))
+sd_Years <- sd(employee$Experience_Years, na.rm = TRUE)
+print(paste("Standard Deviation of Experience Years:", sd_Years))
 
 
 #6.Identify categorical and numerical features
@@ -65,6 +70,7 @@ sapply(employee, function(col) {
 })
 
 
+
 #B.1 Data Exploration & Visualization
 #Creating Histogram for Each Numerical Data
 hist(employee$Age)
@@ -73,7 +79,7 @@ hist(employee$Performance_Score)
 
 
 #Creating 3 Box-plot for Each Numerical Data
-
+library(ggplot2)
 ggplot(employee, aes(y = Experience_Years)) +
   geom_boxplot(fill = "blue") +
   labs(title = "Boxplot of Experience_Years", y = "Experience_Years")
@@ -88,8 +94,8 @@ ggplot(employee, aes(y = Performance_Score)) +
   labs(title = "Boxplot of Performance_Score", y = "Performance_Score")
 
 
-#Creating 3 Bar-chart for Each Numerical Data
 
+#Creating 3 Bar-chart for Each Numerical Data
 #Bar chart for Employee Age 
 Age_counts <- table(employee$Age)
 barplot(Age_counts,
@@ -133,9 +139,6 @@ table(employee$Department)
 #B.2
 #Bivariate Analysis
 #Correlation matrix (heatmap)
-
-install.packages("reshape2")
-
 
 library(reshape2)
 
@@ -300,7 +303,7 @@ cat("Total NA values in Experience_Years after cleaning:", sum(is.na(employee$Ex
 
 #Replacing NA values of Performance_Score with the Mean of Performance_Score
 employee$Performance_Score[is.na(employee$Performance_Score)] <- mean(employee$Performance_Score, na.rm = TRUE)
-cat("Total NA values after replacing:", sum(is.na(Clean_employee)), "\n") #Sum of number of NA values in  new Dataframe
+cat("Total NA values after replacing:", sum(is.na(employee)), "\n") #Sum of number of NA values in  new Dataframe
 
 
 
@@ -378,6 +381,8 @@ employee <- cbind(employee, Dept_encode)
 View(employee) #To view full dataset
 
 
+
+
 #To delete extra columns:
 #employee$DepartmentFinance  <- NULL
 #employee$DepartmentHR  <- NULL  
@@ -387,6 +392,7 @@ View(employee) #To view full dataset
 #employee$DepartmentSales    <- NULL
 
 
+#Numeric Form
 sapply(employee, is.numeric)   #to check which columns are Numeric
 
 
@@ -431,3 +437,19 @@ hist(employee$Salary_log, main="Salary Distribution", xlab="Salary")
 
 
 
+
+#C5 
+#Feature Selection using Correlation
+
+
+numeric_data <- employee[sapply(employee, is.numeric)]   # Assign all numeric columns from employee dataset to numeric_data
+corr_matrix <- cor(numeric_data, use = "complete.obs")  # cor() function to calculate correlation, corr(numeric_data, ..) for numeric pairs; use = "complete.obs" to ignore NA values; na.rm cant be used in cor()
+
+target_cor <- corr_matrix[, "Performance_Score"]   # Select correlation of all features with the target variable Performance_Score; score chosen because no other values can be predicted
+target_cor_no_target <- target_cor[names(target_cor) != "Performance_Score"]   # Remove the target itself from the list to consider input features
+
+sorted_features <- sort(abs(target_cor_no_target), decreasing = TRUE)   #abs is used to find absolute values of correlation; Sort features by absolute correlation in descending order to get the strongest related features
+top_features <- names(sorted_features)[1:4]   # Pick top 4 features closest to Performance_Score
+
+print(paste("Top features closest to Performance_Score:",top_features))   # Print the top  4 features closest to the target
+print(round(target_cor[top_features], 3))   # Round correlation values to 3 decimal places for easier reading
