@@ -2,7 +2,7 @@
 #Packages:
 
 #List of required packages
-packages <- c("ggplot2", "dplyr","reshape2","outliers")
+packages <- c("ggplot2", "dplyr","reshape2","outliers","e1071")
 
 # Install any packages that are not already installed
 installed_packages <- rownames(installed.packages())
@@ -194,8 +194,9 @@ ggplot(employee, aes(x = Performance_Score, y = Experience_Years )) +
   geom_smooth(method = "lm", se = FALSE, color = "yellow") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
   labs(title = "P_Score vs E_Year", x = "P_Score", y = "E_Year ")
 
-#Skewness based on Mean vs Median
 
+
+#Skewness based on Mean vs Median
 #For Salary
 sal_mean <- mean(employee$Salary)
 sal_median <- median(employee$Salary)
@@ -351,7 +352,6 @@ upper_bound <- Q3 + 1.5 * IQR_value
 outliers <- employee$Performance_Score[!is.na(employee$Performance_Score) &  #!is.na to find outliers excluding NA values
                                          (employee$Performance_Score < lower_bound | employee$Performance_Score > upper_bound)]
 
-#Print using if-else
 if(length(outliers) > 0){
   for(val in outliers){
     print(paste(format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
@@ -359,3 +359,75 @@ if(length(outliers) > 0){
 } else {
   print("There are no outliers in Performance_Score")
 }
+
+#C3
+# One Hot Encoding for Gender
+gender_encode <- model.matrix(~ Gender - 1, data = employee)  #model.matrix() function to change categorical values to numerical     ~Gender means OHE on Gender column   #-1 is to create 1 col per category
+
+# Combining with original Dataset
+employee <- cbind(employee, gender_encode)      #cbind to add the new columns to the original table
+
+head(employee) #checking if OHE was added
+
+#One Hot Encoding for Department
+Dept_encode <- model.matrix(~ Department - 1, data = employee)
+
+# Combining with original Dataset
+employee <- cbind(employee, Dept_encode)
+
+View(employee) #To view full dataset
+
+
+#To delete extra columns:
+#employee$DepartmentFinance  <- NULL
+#employee$DepartmentHR  <- NULL  
+#employee$DepartmentIT  <- NULL
+#employee$DepartmentMarketing   <- NULL
+#employee$DepartmentOperations    <- NULL
+#employee$DepartmentSales    <- NULL
+
+
+sapply(employee, is.numeric)   #to check which columns are Numeric
+
+
+
+#C4
+#Data Transformation
+
+#Normalization using Min-Max scaling
+
+#For Salary
+employee$Salary <- (employee$Salary - min(employee$Salary)) / (max(employee$Salary) - min(employee$Salary))
+
+#For Exp_Years
+employee$Experience_Years <- (employee$Experience_Years - min(employee$Experience_Years, na.rm = TRUE)) / (max(employee$Experience_Years, na.rm = TRUE) - min(employee$Experience_Years, na.rm = TRUE))
+head(employee)
+
+
+#Skewness for salary using e1071 library(for skewness() function)
+library(e1071)
+skewness_value <- skewness(employee$Salary)
+print(skewness_value)
+hist(employee$Salary, main="Salary Distribution", xlab="Salary")  #showing Original salary Histogram
+
+
+#Fixing Salary Skewness using log
+employee$Salary_log <- log(employee$Salary + 1)
+
+#Skewness based on Mean vs Median
+#For Salary
+sal_log_mean <- mean(employee$Salary_log)
+sal_log_median <- median(employee$Salary_log)
+if(sal_log_mean>sal_log_median){
+  print("Log_Salary is Positively Skewed")
+} else if(sal_log_mean < sal_log_median){
+  print("Log_Salary is Negatively Skewed")
+}  else {
+  print("Log_Salary is Symmetric")
+}
+
+#showing new logged salary Histogram
+hist(employee$Salary_log, main="Salary Distribution", xlab="Salary") 
+
+
+
