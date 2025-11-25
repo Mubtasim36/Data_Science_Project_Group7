@@ -2,7 +2,7 @@
 #Packages:
 
 #List of required packages
-packages <- c("ggplot2", "dplyr","reshape2","outliers","e1071")
+packages <- c("ggplot2", "dplyr","reshape2","outliers","e1071","corrplot")
 
 # Install any packages that are not already installed
 installed_packages <- rownames(installed.packages())
@@ -16,6 +16,15 @@ for (pkg in packages) {
 #1. reading the Dataset
 url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/employee_performance.csv"
 employee <- read.csv(url)
+colnames(employee) #To see column names
+
+#To see unique values of each columns:
+unique(employee$Age)
+unique(employee$Gender)
+unique(employee$Department)
+unique(employee$Experience_Years)
+unique(employee$Performance_Score)
+unique(employee$Salary)
 
 
 #2. displaying few rows:
@@ -363,25 +372,31 @@ if(length(outliers) > 0){
   print("There are no outliers in Performance_Score")
 }
 
+
+
+
 #C3
 # One Hot Encoding for Gender
 gender_encode <- model.matrix(~ Gender - 1, data = employee)  #model.matrix() function to change categorical values to numerical     ~Gender means OHE on Gender column   #-1 is to create 1 col per category
-
 # Combining with original Dataset
 employee <- cbind(employee, gender_encode)      #cbind to add the new columns to the original table
-
 head(employee) #checking if OHE was added
 
 #One Hot Encoding for Department
 Dept_encode <- model.matrix(~ Department - 1, data = employee)
-
 # Combining with original Dataset
 employee <- cbind(employee, Dept_encode)
 
-View(employee) #To view full dataset
+
+
+#Converting Employee_ID to numeric
+employee$Employee_ID <- as.numeric(sub("E", "", employee$Employee_ID))  #Removing E from the IDs
 
 
 
+#Removing Original Gender and Department Columns as it is already encoded
+employee$Department  <- NULL
+employee$Gender  <- NULL
 
 #To delete extra columns:
 #employee$DepartmentFinance  <- NULL
@@ -394,6 +409,7 @@ View(employee) #To view full dataset
 
 #Numeric Form
 sapply(employee, is.numeric)   #to check which columns are Numeric
+View(employee) #To view full dataset
 
 
 
@@ -417,8 +433,9 @@ print(skewness_value)
 hist(employee$Salary, main="Salary Distribution", xlab="Salary")  #showing Original salary Histogram
 
 
-#Fixing Salary Skewness using log
-employee$Salary_log <- log(employee$Salary + 1)
+#Fixing Salary Skewness using log 
+employee$Salary_log <- log(employee$Salary + 1)           # +1 to avoid negative/NaN salary_log values
+employee$Salary <- NULL             #removing original salary column to only keep Salary_log
 
 #Skewness based on Mean vs Median
 #For Salary
@@ -437,6 +454,18 @@ hist(employee$Salary_log, main="Salary Distribution", xlab="Salary")
 
 
 
+#Cleaning Duplicates
+
+any(duplicated(employee$Employee_ID))                                   #to see whether there are any duplicates
+employee$Employee_ID[duplicated(employee$Employee_ID)]                  #returns all values which have duplicates
+table(employee$Employee_ID)[table(employee$Employee_ID) > 1]            #Shows how many of each duplicates there are
+
+library(dplyr)
+
+employee <- employee %>%
+  distinct(Employee_ID, .keep_all = TRUE)                               #Keeps the first unique values
+
+
 
 #C5 
 #Feature Selection using Correlation
@@ -449,7 +478,16 @@ target_cor <- corr_matrix[, "Performance_Score"]   # Select correlation of all f
 target_cor_no_target <- target_cor[names(target_cor) != "Performance_Score"]   # Remove the target itself from the list to consider input features
 
 sorted_features <- sort(abs(target_cor_no_target), decreasing = TRUE)   #abs is used to find absolute values of correlation; Sort features by absolute correlation in descending order to get the strongest related features
-top_features <- names(sorted_features)[1:4]   # Pick top 4 features closest to Performance_Score
+top_features <- names(sorted_features)[1:5]   # Pick top 4 features closest to Performance_Score
 
-print(paste("Top features closest to Performance_Score:",top_features))   # Print the top  4 features closest to the target
+print(paste("Top features closest to Performance_Score:",top_features))   # Print the top  5 features closest to the target
 print(round(target_cor[top_features], 3))   # Round correlation values to 3 decimal places for easier reading
+
+selected_columns <- c("Employee_ID",top_features, "Performance_Score")   #columns with top correlation values
+employee_selected <- employee[, selected_columns]   #new dataset with top corr values
+
+View(employee_selected)         #viewing new dataset with top corr values
+
+library("corrplot")
+corr_matrix_selected <- cor(employee_selected, use = "complete.obs")
+corrplot(corr_matrix_selected, method = "color")
