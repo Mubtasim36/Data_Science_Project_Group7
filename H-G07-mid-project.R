@@ -73,7 +73,7 @@ print(paste("Standard Deviation of Experience Years:", sd_Years))
 sapply(employee, function(col) {
   if (is.numeric(col)) {
     return("Numerical Feature")
-  } else if (is.character(col)) {
+  } else if (!is.numeric(col)) {
     return("Categorical Feature")
   }
 })
@@ -104,16 +104,7 @@ ggplot(employee, aes(y = Performance_Score)) +
 
 
 
-#Creating 3 Bar-chart for Each Numerical Data
-#Bar chart for Employee Age 
-Age_counts <- table(employee$Age)
-barplot(Age_counts,
-        main = "Age Distribution",
-        xlab = "Age",
-        ylab = "Count",
-        col = "blue",
-        ylim = c(0, 1.2 * max(Age_counts)),#limit for y axis values
-        las = 2)
+#Creating 3 Bar-chart for Each Categorical Data
 
 #Bar chart for Employee Gender 
 
@@ -434,13 +425,12 @@ hist(employee$Salary, main="Salary Distribution", xlab="Salary")  #showing Origi
 
 
 #Fixing Salary Skewness using log 
-employee$Salary_log <- log(employee$Salary + 1)           # +1 to avoid negative/NaN salary_log values
-employee$Salary <- NULL             #removing original salary column to only keep Salary_log
+employee$Salary <- log(employee$Salary + 1)           # +1 to avoid negative/NaN values; Original salary replaced with log salary in same variable
 
 #Skewness based on Mean vs Median
 #For Salary
-sal_log_mean <- mean(employee$Salary_log)
-sal_log_median <- median(employee$Salary_log)
+sal_log_mean <- mean(employee$Salary)
+sal_log_median <- median(employee$Salary)
 if(sal_log_mean>sal_log_median){
   print("Log_Salary is Positively Skewed")
 } else if(sal_log_mean < sal_log_median){
@@ -450,7 +440,7 @@ if(sal_log_mean>sal_log_median){
 }
 
 #showing new logged salary Histogram
-hist(employee$Salary_log, main="Salary Distribution", xlab="Salary") 
+hist(employee$Salary, main="Salary Distribution", xlab="Salary") 
 
 
 
@@ -474,20 +464,20 @@ employee <- employee %>%
 numeric_data <- employee[sapply(employee, is.numeric)]   # Assign all numeric columns from employee dataset to numeric_data
 corr_matrix <- cor(numeric_data, use = "complete.obs")  # cor() function to calculate correlation, corr(numeric_data, ..) for numeric pairs; use = "complete.obs" to ignore NA values; na.rm cant be used in cor()
 
-target_cor <- corr_matrix[, "Performance_Score"]   # Select correlation of all features with the target variable Performance_Score; score chosen because no other values can be predicted
-target_cor_no_target <- target_cor[names(target_cor) != "Performance_Score"]   # Remove the target itself from the list to consider input features
+target_cor <- corr_matrix[, "Salary"]   # Select correlation of all features with the target variable Salary; Salary chosen as target
+target_cor_no_target <- target_cor[!names(target_cor) %in% c("Salary")]   # Remove the target itself from the list to consider input features
 
 sorted_features <- sort(abs(target_cor_no_target), decreasing = TRUE)   #abs is used to find absolute values of correlation; Sort features by absolute correlation in descending order to get the strongest related features
-top_features <- names(sorted_features)[1:5]   # Pick top 4 features closest to Performance_Score
+top_features <- names(sorted_features)[1:5]   # Pick top 5 features closest to Salary
 
-print(paste("Top features closest to Performance_Score:",top_features))   # Print the top  5 features closest to the target
+print(paste("Top features closest to Salary:",top_features))   # Print the top  5 features closest to the target
 print(round(target_cor[top_features], 3))   # Round correlation values to 3 decimal places for easier reading
 
-selected_columns <- c("Employee_ID",top_features, "Performance_Score")   #columns with top correlation values
+selected_columns <- c("Employee_ID",top_features, "Salary")   #columns with top correlation values
 employee_selected <- employee[, selected_columns]   #new dataset with top corr values
 
 View(employee_selected)         #viewing new dataset with top corr values
 
 library("corrplot")
 corr_matrix_selected <- cor(employee_selected, use = "complete.obs")
-corrplot(corr_matrix_selected, method = "color")
+corrplot(corr_matrix_selected, method = "number")
