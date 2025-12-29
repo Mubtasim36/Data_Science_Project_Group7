@@ -164,7 +164,6 @@ ggplot(employee, aes(x = Salary, y = Performance_Score )) +
 
 #Column Names
 colnames(employee)
-
 #BoxPlot
 #1
 ggplot(employee, aes(x=Gender,y = Age)) +
