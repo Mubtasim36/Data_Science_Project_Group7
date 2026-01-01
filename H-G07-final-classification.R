@@ -114,7 +114,7 @@ ggplot(employee, aes(x = Salary, y = Experience_Years )) +
 ggplot(employee, aes(x = Age, y = Performance_Score )) +
   geom_point() +     #Adds scatter plot points (one point for each employee).
   geom_smooth(method = "lm", se = FALSE, color = "blue") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "Salary vs PS", x = "Salary", y = "Performance_Score ")
+  labs(title = "Age vs PS", x = "Age", y = "Performance_Score ")
 
 ggplot(employee, aes(x = Age, y = Experience_Years )) +
   geom_point() +     #Adds scatter plot points (one point for each employee).
@@ -396,11 +396,39 @@ model_dt <- rpart(
 summary(model_dt)
 
 
-
 #3; Prediction matrix
 pred_dt <- predict(model_dt, newdata = testData, type = "class")  #Uses the trained model to predict species for test data.   type = "class" returns class labels instead of probabilities.
 head(pred_dt)
 
+test_labels <- factor(testData$Department) #converting department to factor(Factors are R’s way of representing categorical variables)
+pred_labels <- factor(pred_dt, levels = levels(test_labels)) ## Ensure predictions are factor with same levels as test labels
+class(pred_dt)   #Checking data type for confusion matrix
+class(testData$Department)#Checking data type for confusion matrix
+
+
 #4; confusion Matrix
-conf_mat <- confusionMatrix(pred_dt, testData$Department)   #Compares predicted labels with actual labels.
-conf_mat
+library(caret)
+conf_mat <- confusionMatrix(pred_labels, test_labels)
+print(conf_mat)
+#for output:Rows = Predicted class; Columns= Actual class
+# Interpretation:
+# Rows represent predicted departments and columns represent actual departments.
+# Only diagonal values indicate correctly classified instances.
+# Non-diagonal values represent mis-classifications.
+
+
+#5; Accuracy:   Accuracy represents the overall correctness of the classifier across all departments.
+accuracy <- conf_mat$overall['Accuracy']    #Extracts overall classification accuracy.
+cat("Model Accuracy:", round(accuracy, 4), "\n")
+
+#Extract Precision, Recall, and F1-score per class
+class_metrics <- conf_mat$byClass[, c("Precision", "Recall", "F1")] 
+#Precision indicates how reliable the model's predictions are for each department.
+#F1-score balances precision and recall and is useful when class distribution is uneven.
+#HR, IT was not predicted in the model(as confusion matrix has NOT predicted HR or IT; so Precision and F1 are NA for them)
+print("Class-wise Performance Metrics:")
+print(round(class_metrics, 4))
+
+
+
+
