@@ -2,14 +2,14 @@
 #A. Data Collection
 
 #Dataset Source: Kaggle
-#Dataset Link: https://www.kaggle.com/datasets/mamunhasan2cs/employee-performance-and-salary-synthetic-dataset
+#Dataset Link: https://www.kaggle.com/datasets/kundanbedmutha/exam-score-prediction-dataset
 
 
-#Dataset Description: This dataset contains information on over 1,000 employees from a 
-#medium-sized organization across six departments. It includes attributes such as age, 
-#gender, department, years of experience, performance score, and salary. The dataset also 
-#contains missing values, duplicate records, and outliers to reflect real-world data 
-#challenges commonly encountered in data science and machine learning projects.
+#Dataset Description: This dataset provides an extensive and realistic representation of 
+#various factors that contribute to student exam performance. It contains 20,000 records, 
+#each describing a student’s academic behavior, study habits, lifestyle routines, and exam 
+#conditions. These variables collectively help understand how different aspects of a student’s 
+#daily life and learning environment influence their exam outcomes.
 
 
 
@@ -28,98 +28,99 @@ for (pkg in packages) {
 
 
 
+#Extra-
+#Creating NA values:
+#Score_predict <- read.csv("Exam_Score_Prediction.csv")
+#Score_predict[Score_predict == ""] <- NA
+#colSums(is.na(Score_predict))
+#write.csv(Score_predict, "Exam_Score_Prediction.csv", row.names = FALSE, na = "")
+
+
 
 #1. reading the Dataset
-url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/employee_performance.csv"
-employee <- read.csv(url)
-colnames(employee) #To see column names
+url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/Exam_Score_Prediction.csv"
+Score_predict <- read.csv(url)
+colnames(Score_predict) #To see column names
 
 
 
 #B. Data Understanding & Exploration 
 
 #Shape of the data set 
-print(paste("The shape of the dataset is: ",nrow(employee),"x",ncol(employee)))
+print(paste("The shape of the dataset is: ",nrow(Score_predict),"x",ncol(Score_predict)))
 
 
 #Showing data type
-cat(                         #Cat is used to print multi line 
-  "Data Type of Employee_ID column:", class(employee$Employee_ID), "\n",
-  "Data Type of Age column:", class(employee$Age), "\n",
-  "Data Type of Gender column:", class(employee$Gender), "\n",
-  "Data Type of Department column:", class(employee$Department), "\n",
-  "Data Type of Experience_Years column:", class(employee$Experience_Years), "\n",
-  "Data Type of Performance_Score column:", class(employee$Performance_Score), "\n",
-  "Data Type of Salary column:", class(employee$Salary), "\n"
-)
+sapply(Score_predict, class)
 
 
 #Showing Summary Statistics
-summary(employee)
+summary(Score_predict)
 
 
 #.Identify categorical and numerical features
-sapply(employee, function(col) {
-  if (is.numeric(col)) {
-    return("Numerical Feature")
-  } else if (!is.numeric(col)) {
-    return("Categorical Feature")
-  }
+sapply(Score_predict, function(col) {
+  if (is.numeric(col)) "Numerical Feature" else "Categorical Feature"
 })
 
 
-
 #Creating Histogram
-hist(employee$Age)
-hist(employee$Experience_Years)
-hist(employee$Performance_Score)
-hist(employee$Salary)
+hist(Score_predict$age)
+hist(Score_predict$study_hours)
+hist(Score_predict$class_attendance)
+hist(Score_predict$sleep_hours)
+hist(Score_predict$exam_score)
 
 
 
 #Creating Box-plot for Each Numerical Data
 library(ggplot2)
-ggplot(employee, aes(y = Experience_Years)) +
+ggplot(Score_predict, aes(y = age)) +
   geom_boxplot(fill = "blue") +
-  labs(title = "Boxplot of Experience_Years", y = "Experience_Years")
+  labs(title = "Boxplot of age", y = "age")
 
-ggplot(employee, aes(y = Age)) +
+ggplot(Score_predict, aes(y = study_hours)) +
   geom_boxplot(fill = "green") +
-  labs(title = "Boxplot of Age", y = "Age")
+  labs(title = "Boxplot of study_hours", y = "study_hours")
 
 
-ggplot(employee, aes(y = Performance_Score)) +
+ggplot(Score_predict, aes(y = class_attendance)) +
   geom_boxplot(fill = "red") +
-  labs(title = "Boxplot of Performance_Score", y = "Performance_Score")
+  labs(title = "Boxplot of class_attendance", y = "class_attendance")
 
 
-ggplot(employee, aes(y = Salary)) +
+ggplot(Score_predict, aes(y = sleep_hours)) +
   geom_boxplot(fill = "yellow") +
-  labs(title = "Boxplot of Salary", y = "Salary")
+  labs(title = "Boxplot of sleep_hours", y = "sleep_hours")
+
+
+ggplot(Score_predict, aes(y = exam_score)) +
+  geom_boxplot(fill = "yellow") +
+  labs(title = "Boxplot of exam_score", y = "exam_score")
 
 
 
 #Scatterplots:
 
-ggplot(employee, aes(x = Salary, y = Performance_Score )) +
-  geom_point() +     #Adds scatter plot points (one point for each employee).
+ggplot(Score_predict, aes(x = age, y = study_hours )) +
+  geom_point() +     #Adds scatter plot points (one point for each Score_predict).
   geom_smooth(method = "lm", se = FALSE, color = "blue") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "Salary vs PS", x = "Salary", y = "Performance_Score ")
+  labs(title = "age vs StudyHours", x = "age", y = "study_hours ")
 
-ggplot(employee, aes(x = Salary, y = Experience_Years )) +
-  geom_point() +     #Adds scatter plot points (one point for each employee).
+ggplot(Score_predict, aes(x = exam_score, y = sleep_hours )) +
+  geom_point() +     #Adds scatter plot points (one point for each exam_score).
   geom_smooth(method = "lm", se = FALSE, color = "red") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "Salary vs Year", x = "Salary", y = "Experience_Years ")
+  labs(title = "exam_score vs SleepHours", x = "exam_score", y = "sleep_hours ")
 
-ggplot(employee, aes(x = Age, y = Performance_Score )) +
-  geom_point() +     #Adds scatter plot points (one point for each employee).
+ggplot(Score_predict, aes(x = class_attendance, y = study_hours )) +
+  geom_point() +     #Adds scatter plot points (one point for each exam_score).
   geom_smooth(method = "lm", se = FALSE, color = "blue") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "Salary vs PS", x = "Salary", y = "Performance_Score ")
+  labs(title = "class_attendance vs study_hours", x = "class_attendance", y = "study_hours ")
 
-ggplot(employee, aes(x = Age, y = Experience_Years )) +
-  geom_point() +     #Adds scatter plot points (one point for each employee).
+ggplot(Score_predict, aes(x = study_hours, y = sleep_hours )) +
+  geom_point() +     #Adds scatter plot points (one point for each exam_score).
   geom_smooth(method = "lm", se = FALSE, color = "yellow") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "Age vs Year", x = "Age", y = "Experience_Years ")
+  labs(title = "study_hours vs sleep_hours", x = "study_hours", y = "sleep_hours ")
 
 
 
@@ -127,7 +128,7 @@ ggplot(employee, aes(x = Age, y = Experience_Years )) +
 
 library(reshape2)
 
-num_data <- employee[sapply(employee, is.numeric)]
+num_data <- Score_predict[sapply(Score_predict, is.numeric)]
 corr_mat <- cor(num_data)
 
 melted_corr_mat <- melt(corr_mat)       #Convert matrix into long format
@@ -139,26 +140,26 @@ ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2,fill=value)) +
 
 
 #Identifying missing values
-colSums(is.na(employee))    #Column wise no. of NA values
-cat("Total NA values:", sum(is.na(employee$Experience_Years)), "\n")    #Sum of number of NA values
+colSums(is.na(Score_predict))    #Column wise no. of NA values
+cat("Total NA values:", sum(is.na(Score_predict)), "\n")    #Sum of number of NA values
 
 
 
 #Identify Outliers
 
-#Possible Outliers for Performance_Score
+#Possible Outliers for exam_score
 
 # Computing IQR 
-Q1 <- quantile(employee$Performance_Score, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
-Q3 <- quantile(employee$Performance_Score, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+Q1 <- quantile(Score_predict$exam_score, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(Score_predict$exam_score, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
 IQR_value <- Q3 - Q1
 
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
-outliers <- employee$Performance_Score[!is.na(employee$Performance_Score) &  #!is.na to find outliers excluding NA values
-                                         (employee$Performance_Score < lower_bound | employee$Performance_Score > upper_bound)]
+outliers <- Score_predict$exam_score[!is.na(Score_predict$exam_score) &  #!is.na to find outliers excluding NA values
+                                         (Score_predict$exam_score < lower_bound | Score_predict$exam_score > upper_bound)]
 
 #Print using if-else
 if(length(outliers) > 0){
@@ -166,85 +167,85 @@ if(length(outliers) > 0){
     print(paste("Performance Score ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
-  print("There are no outliers in Performance_Score")
+  print("There are no outliers in exam_score")
 }
 
 
-#Possible Outliers for Age
+#Possible Outliers for age
 
 # Computing IQR 
-Q1 <- quantile(employee$Age, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
-Q3 <- quantile(employee$Age, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+Q1 <- quantile(Score_predict$age, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(Score_predict$age, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
 IQR_value <- Q3 - Q1
 
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
-outliers <- employee$Age[!is.na(employee$Age) &  #!is.na to find outliers excluding NA values
-                           (employee$Age < lower_bound | employee$Age > upper_bound)]
+outliers <- Score_predict$age[!is.na(Score_predict$age) &  #!is.na to find outliers excluding NA values
+                           (Score_predict$age < lower_bound | Score_predict$age > upper_bound)]
 
 #Print using if-else
 if(length(outliers) > 0){
   for(val in outliers){
-    print(paste("Age ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+    print(paste("age ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
-  print("There are no outliers in Age")
+  print("There are no outliers in age")
 }
 
 
-#Possible Outliers for Salary
+#Possible Outliers for class_attendance
 
 # Computing IQR 
-Q1 <- quantile(employee$Salary, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
-Q3 <- quantile(employee$Salary, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+Q1 <- quantile(Score_predict$class_attendance, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(Score_predict$class_attendance, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
 IQR_value <- Q3 - Q1
 
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
-outliers <- unique(employee$Salary[!is.na(employee$Salary) &  #!is.na to find outliers excluding NA values
-                                     (employee$Salary < lower_bound | employee$Salary > upper_bound)])
+outliers <- unique(Score_predict$class_attendance[!is.na(Score_predict$class_attendance) &  #!is.na to find outliers excluding NA values
+                                     (Score_predict$class_attendance < lower_bound | Score_predict$class_attendance > upper_bound)])
 
 #Print using if-else
 if(length(outliers) > 0){
   for(val in outliers){
-    print(paste("Salary ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+    print(paste("class_attendance ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
-  print("There are no outliers in Salary")
+  print("There are no outliers in class_attendance")
 }
 
 
-#Possible Outliers for Experience_years
+#Possible Outliers for study_hours
 
 # Computing IQR 
-Q1 <- quantile(employee$Experience_Years, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
-Q3 <- quantile(employee$Experience_Years, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+Q1 <- quantile(Score_predict$study_hours, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(Score_predict$study_hours, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
 IQR_value <- Q3 - Q1
 
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
-outliers <- unique(employee$Experience_Years[!is.na(employee$Experience_Years) &  #!is.na to find outliers excluding NA values
-                                               (employee$Experience_Years < lower_bound | employee$Experience_Years > upper_bound)])
+outliers <- unique(Score_predict$study_hours[!is.na(Score_predict$study_hours) &  #!is.na to find outliers excluding NA values
+                                               (Score_predict$study_hours < lower_bound | Score_predict$study_hours > upper_bound)])
 
 #Print using if-else
 if(length(outliers) > 0){
   for(val in outliers){
-    print(paste("Experience Year ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+    print(paste("Study Hour ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
-  print("There are no outliers in Experience_Years")
+  print("There are no outliers in study_hours")
 }
 
 
 
 #Relationships shown using correlation
-numeric_data <- employee[sapply(employee, is.numeric)]  #Finds numeric data
+numeric_data <- Score_predict[sapply(Score_predict, is.numeric)]  #Finds numeric data
 corr_matrix <- cor(numeric_data, use = "complete.obs")   #cor() calculates pairwise correlations between all numeric columns.    use = "complete.obs" ensures that only rows without missing values are considered for each pair of columns.
 print("Correlation matrix:")
 print(corr_matrix)   
@@ -257,111 +258,119 @@ print(corr_matrix)
 #Handling Missing Values
 
 #Detect missing values
-colSums(is.na(employee))    #Column wise no. of NA values
-cat("Total NA values:", sum(is.na(employee$Experience_Years)), "\n")    #Sum of number of NA values
+colSums(is.na(Score_predict))    #Column wise no. of NA values
+cat("Total NA values:", sum(is.na(Score_predict)), "\n")    #Sum of number of NA values
 
-#Removing NA Values in Experience_Years column
-employee <- employee[!is.na(employee$Experience_Years), ]
+#Removing NA Values in exam_score column
+Score_predict <- Score_predict[!is.na(Score_predict$exam_score), ]
 
 #Checking NA values after removing missing values
-cat("Total NA values in Experience_Years after cleaning:", sum(is.na(employee$Experience_Years)), "\n")
+cat("Total NA values in exam_score after cleaning:", sum(is.na(Score_predict$exam_score)), "\n")
 
 
-#Replacing NA values of Performance_Score with the Mean of Performance_Score
-employee$Performance_Score[is.na(employee$Performance_Score)] <- mean(employee$Performance_Score, na.rm = TRUE)
-cat("Total NA values after replacing:", sum(is.na(employee)), "\n") #Sum of number of NA values in  new Dataframe
+
+
+#Replacing NA values of class_attendance with the Mean of class_attendance
+Score_predict$class_attendance[is.na(Score_predict$class_attendance)] <- mean(Score_predict$class_attendance, na.rm = TRUE)
+cat("Total NA values after replacing:", sum(is.na(Score_predict)), "\n") #Sum of number of NA values in  new Dataframe
 
 
 
 #Handling Outliers
 
-#Capping Performance_score; As there may be real performers among the Outliers, so taking an appropriate low and a high value to cap the scores
-lower_limit <- 50   #As most low values are close to 50
-upper_limit <- 95    #As most high values are close to 95
+range(Score_predict$study_hours) #to find the non-outlier values  range
+#Capping study_hours; As there may be real performers among the Outliers, so taking an appropriate low and a high value to cap the scores
+lower_limit <- 0.08   #As most low values are close to 0.08
+upper_limit <- 12    #As most high values are close to 12
 # Cap the outliers
-employee$Performance_Score <- pmin(pmax(employee$Performance_Score, lower_limit), upper_limit)
+Score_predict$study_hours <- pmin(pmax(Score_predict$study_hours, lower_limit), upper_limit)
 
 
 
 #Checking for Outliers after Capping
 # Computing IQR 
-Q1 <- quantile(employee$Performance_Score, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
-Q3 <- quantile(employee$Performance_Score, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
+Q1 <- quantile(Score_predict$study_hours, 0.25, na.rm = TRUE)    #quantile function, first value is the value to work on, the second is the position of the sorted data; in this case values are from 0 to 1 or 0 to 100%; so 0.25 is 25% and so on
+Q3 <- quantile(Score_predict$study_hours, 0.75, na.rm = TRUE)   #na.rm=TRUE to calculate without considering the NA values
 IQR_value <- Q3 - Q1
 
 lower_bound <- Q1 - 1.5 * IQR_value
 upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
-outliers <- employee$Performance_Score[!is.na(employee$Performance_Score) &  #!is.na to find outliers excluding NA values
-                                         (employee$Performance_Score < lower_bound | employee$Performance_Score > upper_bound)]
+outliers <- Score_predict$study_hours[!is.na(Score_predict$study_hours) &  #!is.na to find outliers excluding NA values
+                                         (Score_predict$study_hours < lower_bound | Score_predict$study_hours > upper_bound)]
 
 if(length(outliers) > 0){
   for(val in outliers){
     print(paste(format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
-  print("There are no outliers in Performance_Score")
+  print("There are no outliers in study_hours")
 }
 
 
 
 #Encoding Categorical values
 
-# One Hot Encoding for Gender
-gender_encode <- model.matrix(~ Gender - 1, data = employee)  #model.matrix() function to change categorical values to numerical     ~Gender means OHE on Gender column   #-1 is to create 1 col per category
+# One Hot Encoding for gender
+gender_encode <- model.matrix(~ gender - 1, data = Score_predict)  #model.matrix() function to change categorical values to numerical     ~gender means OHE on gender column   #-1 is to create 1 col per category
 # Combining with original Dataset
-Encoded_employee <- cbind(employee, gender_encode)      #cbind to add the new columns to a new table
-head(Encoded_employee) #checking if OHE was added
+Encoded_Score_predict <- cbind(Score_predict, gender_encode)      #cbind to add the new columns to a new table
+head(Encoded_Score_predict) #checking if OHE was added
 
 
 
-#One Hot Encoding for Department
-Dept_encode <- model.matrix(~ Department - 1, data = employee)
+#One Hot Encoding for internet_access
+internet_encode <- model.matrix(~ internet_access - 1, data = Score_predict)
 
 # Combining with original Dataset
-Encoded_employee <- cbind(employee, Dept_encode)
+Encoded_Score_predict <- cbind(Score_predict, internet_encode)
 
 
 #Normalizing Numeric Values using Min-Max Scaling
 
-Norm_employee<-employee #Creating new Table for Other Tasks so that original table stays same
+Norm_Score_predict<-Score_predict #Creating new Table for Other Tasks so that original table stays same
 
-#For Salary
-Norm_employee$Salary <- (employee$Salary - min(employee$Salary)) / (max(employee$Salary) - min(employee$Salary))
+#For class_attendance
+Norm_Score_predict$class_attendance <- (Score_predict$class_attendance - min(Score_predict$class_attendance, na.rm = TRUE)) / (max(Score_predict$class_attendance, na.rm = TRUE) - min(Score_predict$class_attendance, na.rm = TRUE))
+head(Norm_Score_predict)
 
-#For Exp_Years
-Norm_employee$Experience_Years <- (employee$Experience_Years - min(employee$Experience_Years, na.rm = TRUE)) / (max(employee$Experience_Years, na.rm = TRUE) - min(employee$Experience_Years, na.rm = TRUE))
-head(employee)
+#For study_hours
+Norm_Score_predict$study_hours <- (Score_predict$study_hours - min(Score_predict$study_hours, na.rm = TRUE)) / (max(Score_predict$study_hours, na.rm = TRUE) - min(Score_predict$study_hours, na.rm = TRUE))
+head(Norm_Score_predict)
 
 
 
 #Applying Transformation to fix skewness
 
-#Salary
+#class_attendance
 library(e1071)
-skewness_value <- skewness(Norm_employee$Salary)
+skewness_value <- skewness(Norm_Score_predict$class_attendance)
 print(skewness_value)
-hist(Norm_employee$Salary, main="Salary Distribution", xlab="Salary")  #showing Original salary Histogram
-
-#Fixing Salary Skewness using log 
-Norm_employee$Salary <- log(Norm_employee$Salary + 1)           # +1 to avoid negative/NaN values; Original salary replaced with log salary in same variable
+hist(Norm_Score_predict$class_attendance, main="class_attendance Distribution", xlab="class_attendance")  #showing Original class_attendance Histogram
 
 
+#Fixing class_attendance Skewness using log 
+Norm_Score_predict$class_attendance <- log(Norm_Score_predict$class_attendance + 1)           # +1 to avoid negative/NaN values; Original salary replaced with log salary in same variable
 
-#Experience_Years
+
+
+#study_hours
 library(e1071)
-sal_skewness_value <- skewness(Norm_employee$Experience_Years)
+sal_skewness_value <- skewness(Norm_Score_predict$study_hours)
 print(sal_skewness_value)
-hist(Norm_employee$Experience_Years, main="Experience_Years Distribution", xlab="Experience_Years")  #showing Original Experience_Years Histogram
+hist(Norm_Score_predict$study_hours, main="study_hours Distribution", xlab="study_hours")  #showing Original study_hours Histogram
 
-#Fixing Experience_Years Skewness using log 
-Norm_employee$Experience_Years <- log(Norm_employee$Experience_Years + 1)           # +1 to avoid negative/NaN values; Original salary replaced with log salary in same variable
+#Fixing study_hours Skewness using log 
+Norm_Score_predict$study_hours <- log(Norm_Score_predict$study_hours + 1)           # +1 to avoid negative/NaN values; Original salary replaced with log salary in same variable
 
 
 
-New_employees<-employee   #New table for Feature Engineering
+New_Score_predicts<-Score_predict   #New table for Feature Engineering
 
 #Feature_Engineering
-New_employees$Sal_per_Exp<-employee$Salary/employee$Experience_Years  #Creating a new table for Salary per 
+New_Score_predicts$score_per_hoursSleep<-Score_predict$exam_score/Score_predict$sleep_hours  #Creating a new table for class_attendance per 
+head(New_Score_predicts)
+
+
 
