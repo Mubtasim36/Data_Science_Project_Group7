@@ -28,14 +28,22 @@ for (pkg in packages) {
 }
 
 
+#Extra-
+#Creating NA values:
+
+#insurance_data <- read.csv("I:/AIUB courses/OneDrive - American International University-Bangladesh/All Semesters/Fall 25-26/Data Science/Group7_Project/insurance.csv")
+#insurance_data[insurance_data == ""] <- NA
+#Detect missing values
+#colSums(is.na(insurance_data))    #Column wise no. of NA values
+#cat("Total NA values:", sum(is.na(insurance_data)), "\n")    #Sum of number of NA values
+#write.csv(insurance_data, "insurance.csv", row.names = FALSE, na = "")   #Saving NA values into the source CSV
+
 
 
 #1. reading the Dataset
 url <- "https://raw.githubusercontent.com/Mubtasim36/Data_Science_Project_Group7/refs/heads/master/insurance.csv"
 insurance_data <- read.csv(url)
 colnames(insurance_data) #To see column names
-
-
 
 #B. Data Understanding & Exploration 
 
@@ -61,13 +69,8 @@ summary(insurance_data)
 
 #.Identify categorical and numerical features
 sapply(insurance_data, function(col) {
-  if (is.numeric(col)) {
-    return("Numerical Feature")
-  } else if (!is.numeric(col)) {
-    return("Categorical Feature")
-  }
+  if (is.numeric(col)) "Numerical Feature" else "Categorical Feature"
 })
-
 
 
 #Creating Histogram
@@ -112,15 +115,15 @@ ggplot(insurance_data, aes(x = age, y = bmi )) +
   geom_smooth(method = "lm", se = FALSE, color = "red") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
   labs(title = "age vs bmi", x = "age", y = "bmi ")
 
-ggplot(insurance_data, aes(x = children, y = smoker )) +
+ggplot(insurance_data, aes(x = children, y = charges )) +
   geom_point() +     #Adds scatter plot points (one point for each insurance_data).
   geom_smooth(method = "lm", se = FALSE, color = "blue") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "children vs smoker", x = "children", y = "smoker ")
+  labs(title = "children vs charges", x = "children", y = "charges ")
 
-ggplot(insurance_data, aes(x = smoker, y = bmi )) +
+ggplot(insurance_data, aes(x = charges, y = bmi )) +
   geom_point() +     #Adds scatter plot points (one point for each insurance_data).
   geom_smooth(method = "lm", se = FALSE, color = "yellow") +     #Adds a linear regression line ("lm" = linear model).se = FALSE removes the shaded confidence interval.
-  labs(title = "smoker vs bmi", x = "smoker", y = "bmi ")
+  labs(title = "charges vs bmi", x = "charges", y = "bmi ")
 
 
 
@@ -159,7 +162,7 @@ upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
 outliers <- insurance_data$age[!is.na(insurance_data$age) &  #!is.na to find outliers excluding NA values
-                                         (insurance_data$age < lower_bound | insurance_data$age > upper_bound)]
+                                 (insurance_data$age < lower_bound | insurance_data$age > upper_bound)]
 
 #Print using if-else
 if(length(outliers) > 0){
@@ -183,7 +186,7 @@ upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
 outliers <- insurance_data$bmi[!is.na(insurance_data$bmi) &  #!is.na to find outliers excluding NA values
-                           (insurance_data$bmi < lower_bound | insurance_data$bmi > upper_bound)]
+                                 (insurance_data$bmi < lower_bound | insurance_data$bmi > upper_bound)]
 
 #Print using if-else
 if(length(outliers) > 0){
@@ -207,7 +210,7 @@ upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
 outliers <- unique(insurance_data$charges[!is.na(insurance_data$charges) &  #!is.na to find outliers excluding NA values
-                                     (insurance_data$charges < lower_bound | insurance_data$charges > upper_bound)])
+                                            (insurance_data$charges < lower_bound | insurance_data$charges > upper_bound)])
 
 #Print using if-else
 if(length(outliers) > 0){
@@ -231,12 +234,12 @@ upper_bound <- Q3 + 1.5 * IQR_value
 
 # Identify Outliers 
 outliers <- unique(insurance_data$children[!is.na(insurance_data$children) &  #!is.na to find outliers excluding NA values
-                                               (insurance_data$children < lower_bound | insurance_data$children > upper_bound)])
+                                             (insurance_data$children < lower_bound | insurance_data$children > upper_bound)])
 
 #Print using if-else
 if(length(outliers) > 0){
   for(val in outliers){
-    print(paste("Experience Year ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
+    print(paste("Children ",format(val, scientific = FALSE), "is an outlier"))  #format(val, scientific = FALSE) to show high values fully
   }
 } else {
   print("There are no outliers in children")
@@ -252,35 +255,48 @@ print(corr_matrix,4)   #Rounding to 4 decimal
 
 
 
+
+                                 
 #C. Data Preprocessing 
 
 
-#Handling Missing Values
-
-#Detect missing values
+#Detect missing values 
 colSums(is.na(insurance_data))    #Column wise no. of NA values
-cat("Total NA values:", sum(is.na(insurance_data$smoker)), "\n")    #Sum of number of NA values
+cat("Total NA values:", sum(is.na(insurance_data$bmi)), "\n")    #Sum of number of NA values
 
-#Removing NA Values in smoker column
-insurance_data <- insurance_data[!is.na(insurance_data$smoker), ]
+
+#Handling Missing Values for BMI
+#Removing NA Values in bmi column
+insurance_data <- insurance_data[!is.na(insurance_data$bmi), ]
 
 #Checking NA values after removing missing values
-cat("Total NA values in smoker after cleaning:", sum(is.na(insurance_data$smoker)), "\n")
+cat("Total NA values in bmi after removing:", sum(is.na(insurance_data$bmi)), "\n")
 
 
-#Replacing NA values of region with the Mean of region
-insurance_data$region[is.na(insurance_data$region)] <- mean(insurance_data$region, na.rm = TRUE)
+
+
+#Detect missing values for Charges
+colSums(is.na(insurance_data))    #Column wise no. of NA values
+cat("Total NA values:", sum(is.na(insurance_data)), "\n")    #Sum of number of NA values
+
+#Replacing NA values of charges with the Mean of charges
+insurance_data$charges[is.na(insurance_data$charges)] <- mean(insurance_data$charges, na.rm = TRUE)
 cat("Total NA values after replacing:", sum(is.na(insurance_data)), "\n") #Sum of number of NA values in  new Dataframe
+
+#Checking NA values after cleaning
+cat("Total NA values in charges after cleaning:", sum(is.na(insurance_data$charges)), "\n")
+
 
 
 
 #Handling Outliers
-range(insurance_data$bmi)
+range(insurance_data$bmi) #checking range of bmi values
 #Capping BMI; As there may be real performers among the Outliers, so taking an appropriate low and a high value to cap the scores
 lower_limit <- 15   #As most low values are close to 15
 upper_limit <- 46    #As most high values are close to 46
 # Cap the outliers
 insurance_data$bmi <- pmin(pmax(insurance_data$bmi, lower_limit), upper_limit)
+range(insurance_data$bmi) #checking range of bmi values after capping
 
 
 
@@ -316,7 +332,6 @@ Encoded1_insurance_data <- cbind(insurance_data, gender_encode)      #cbind to a
 head(Encoded1_insurance_data) #checking if OHE was added
 
 
-
 #One Hot Encoding for smoker
 Dept_encode <- model.matrix(~ smoker - 1, data = insurance_data)
 
@@ -330,7 +345,7 @@ head(Encoded2_insurance_data) #checking if OHE was added
 Norm_insurance_data<-insurance_data #Creating new Table for Other Tasks so that original table stays same
 
 #For charges
-Norm_insurance_data$charges <- (insurance_data$charges - min(insurance_data$charges)) / (max(insurance_data$charges) - min(insurance_data$charges))
+Norm_insurance_data$charges <-  (insurance_data$charges - min(insurance_data$charges, na.rm = TRUE)) /(max(insurance_data$charges, na.rm = TRUE) - min(insurance_data$charges, na.rm = TRUE))    #na.rm=TRUE to ignore NA values
 
 #For children
 Norm_insurance_data$children <- (insurance_data$children - min(insurance_data$children, na.rm = TRUE)) / (max(insurance_data$children, na.rm = TRUE) - min(insurance_data$children, na.rm = TRUE))
@@ -342,7 +357,7 @@ head(Norm_insurance_data)
 
 #charges
 library(e1071)
-skewness_value <- skewness(Norm_insurance_data$charges)
+skewness_value <- skewness(Norm_insurance_data$charges,na.rm=TRUE)  #ignoring NA values
 print(skewness_value)
 hist(Norm_insurance_data$charges, main="charges Distribution", xlab="charges")  #showing Original salary Histogram
 
@@ -353,7 +368,7 @@ Norm_insurance_data$charges <- log(Norm_insurance_data$charges + 1)           # 
 
 #bmi
 library(e1071)
-bmi_skewness_value <- skewness(Norm_insurance_data$bmi)
+bmi_skewness_value <- skewness(Norm_insurance_data$bmi,na.rm=TRUE)
 print(bmi_skewness_value)
 hist(Norm_insurance_data$bmi, main="bmi Distribution", xlab="bmi")  #showing Original bmi Histogram
 
@@ -369,3 +384,35 @@ New_insurance_datas<-insurance_data   #New table for Feature Engineering
 New_insurance_datas$charges_per_children<-insurance_data$charges/insurance_data$children  #Creating a new table for bmi per age
 New_insurance_datas$charges_per_children[is.infinite(New_insurance_datas$charges_per_children)] <- 0  #to replace Inf(infinity value for 0 children) with 0; no child=no charge(only for this feature engineering)
 head(New_insurance_datas)
+
+
+
+
+
+#D: Modeling(Regression)
+
+# Linear Regression Model
+model_lm <- lm(charges ~ age + bmi + children + smoker + sex,
+               data = insurance_data)
+
+summary(model_lm)
+
+
+pred <- predict(model_lm, insurance_data)  #Prediction Values
+actual <- insurance_data$charges           #Actual Values
+
+#Finding Root Mean Squared Error(RMSE)
+#RMSE tells us the standard deviation of the prediction errors.
+RMSE <- sqrt(mean((pred - actual)^2))      
+cat("RMSE:", RMSE, "\n")
+
+#Finding Mean Absolute Error (MAE) :The average of the absolute differences between the predicted 
+#and actual values.
+#based on the results:The model's predictions are on average off by around 4212 USD.
+MAE <- mean(abs(pred - actual))  
+cat("MAE:", MAE, "\n") 
+
+#Finding R squared:Used to explain how much a dependent variable varies when the independent 
+#variable is varied.
+R2 <- summary(model_lm)$r.squared   
+cat("R²:", R2, "\n") 
