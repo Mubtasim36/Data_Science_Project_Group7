@@ -392,8 +392,12 @@ head(New_insurance_datas)
 #D: Modeling(Regression)
 
 # Linear Regression Model
-model_lm <- lm(charges ~ age + bmi + children + smoker + sex,
+#Here Charges is used as the dependent variable(y) and 
+#the other columns have been used as independent variables;
+
+model_lm <- lm(charges ~ age + bmi + children + smoker + sex+region,
                data = insurance_data)
+coefficients(model_lm) #to find the coefficients (w0,w1,w2.....wn)
 
 summary(model_lm)
 
