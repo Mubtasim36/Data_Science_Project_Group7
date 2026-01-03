@@ -16,7 +16,7 @@
 #Packages:
 
 #List of required packages
-packages <- c("ggplot2", "dplyr","reshape2","outliers","e1071","corrplot")
+packages <- c("ggplot2", "dplyr","reshape2","outliers","e1071","corrplot","factoextra","cluster")
 
 # Install any packages that are not already installed
 installed_packages <- rownames(installed.packages())
@@ -276,6 +276,15 @@ cat("Total NA values after replacing:", sum(is.na(Score_predict)), "\n") #Sum of
 
 
 
+
+
+
+#Replacing NA values of class_attendance with the Median of class_attendance
+Score_predict$sleep_hours[is.na(Score_predict$sleep_hours)] <- median(Score_predict$sleep_hours, na.rm = TRUE)
+cat("Total NA values after replacing:", sum(is.na(Score_predict)), "\n") #Sum of number of NA values in  new Dataframe
+
+
+
 #Handling Outliers
 
 range(Score_predict$study_hours) #to find the non-outlier values  range
@@ -374,3 +383,87 @@ head(New_Score_predicts)
 
 
 
+
+#Create a copy of the original dataset
+score_cluster <- Score_predict[1:500, ]
+
+
+#Converting exam_score into 3 categories
+score_cluster$exam_score <- cut(
+  score_cluster$exam_score,
+  breaks = c(-Inf,50,75, Inf),  # define the ranges
+  labels = c("Low", "Medium", "High")
+)
+
+#Deleting columns for Clustering
+score_cluster$student_id <- NULL
+score_cluster$age <- NULL
+
+#New table
+head(score_cluster)
+table(score_cluster$exam_score)
+
+#Assigning all numeric cols to 1 variable
+numeric_data <- score_cluster[sapply(score_cluster, is.numeric)]
+head(numeric_data)
+
+
+#Assigning all categorical cols to 1 variable
+cat_data <- score_cluster[!sapply(score_cluster, is.numeric)]
+head(cat_data)
+
+
+
+
+
+#Modeling
+#Clustering
+
+#1
+#Applying PCA on the numeric columns of Score_predict
+score_pca <- prcomp(numeric_data, scale. = TRUE)
+summary(score_pca)
+
+
+
+#2
+#Visualizing PCA using factoextra
+library(factoextra)
+fviz_eig(score_pca)
+
+
+#3
+
+set.seed(123)
+k_clusters <- 3
+km_res <- kmeans(numeric_data, centers = k_clusters, nstart = 25)
+
+# Add cluster assignment
+score_cluster$cluster <- factor(km_res$cluster)
+
+# Visualize on PCA
+fviz_pca_ind(score_pca, 
+             geom.ind = "point", 
+             col.ind = score_cluster$cluster,
+             palette = "jco",
+             addEllipses = TRUE,
+             legend.title = "Cluster")
+
+
+#4
+#Silhouette Score
+
+library(cluster)
+
+#Distance matrix
+dist_matrix <- dist(numeric_data)  # Euclidean distance by default
+
+#Compute silhouette
+sil <- silhouette(km_res$cluster, dist_matrix)
+
+#View summary
+summary(sil)
+
+
+#Plot silhouette
+fviz_silhouette(sil)
